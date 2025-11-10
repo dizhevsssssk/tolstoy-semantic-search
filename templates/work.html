@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}{{ work.title }} - Толстой Search{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="work-header">
+        <h1>{{ work.title }}</h1>
+        <div class="work-meta">
+            <span>📏 {{ work.original_length }} токенов</span>
+            <span>🔢 {{ work.num_chunks }} частей</span>
+        </div>
+        <a href="{{ work.url }}" target="_blank" class="btn">Читать оригинал</a>
+    </div>
+
+    {% if similar_works %}
+    <div class="similar-works">
+        <h2>Похожие произведения</h2>
+        <div class="similar-list">
+            {% for similar in similar_works %}
+            <div class="similar-item">
+                <div class="similarity-badge">{{ "%.1f"|format(similar.similarity_percent) }}%</div>
+                <h3><a href="{{ similar.url }}" target="_blank">{{ similar.title }}</a></h3>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

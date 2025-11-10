@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Статистика - Толстой Search{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Статистика корпуса</h1>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.total_works }}</div>
+            <div class="stat-label">Произведений</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.total_tokens }}</div>
+            <div class="stat-label">Всего токенов</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.avg_tokens_per_work }}</div>
+            <div class="stat-label">Среднее токенов на произведение</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.search_engine }}</div>
+            <div class="stat-label">Статус поиска</div>
+        </div>
+    </div>
+
+    <div class="info-section">
+        <h2>О системе</h2>
+        <p>Семантический поиск по произведениям Л.Н. Толстого с использованием векторных представлений.</p>
+        <p><strong>Модель:</strong> sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</p>
+        <p><strong>Размерность векторов:</strong> 384</p>
+    </div>
+</div>
+{% endblock %}

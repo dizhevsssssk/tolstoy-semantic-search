@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}История поиска - Толстой Search{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>История поиска</h1>
+    
+    {% if history %}
+    <div class="history-list">
+        {% for query in history|reverse %}
+        <div class="history-item">
+            <a href="{{ url_for('search', q=query) }}">{{ query }}</a>
+            <span class="history-time">Недавно</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-history">
+        <p>Вы еще ничего не искали</p>
+        <a href="{{ url_for('index') }}" class="btn">Начать поиск</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
