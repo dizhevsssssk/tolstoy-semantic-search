@@ -261,15 +261,17 @@ body {
 
 .search-form-inline {
     display: flex;
-    gap: 0;
+    gap: 1rem;
     margin-bottom: 1rem;
+    flex-wrap: wrap;
 }
 
 .search-form-inline input {
     flex: 1;
+    min-width: 200px;
     padding: 0.75rem 1rem;
     border: 2px solid rgba(139, 115, 85, 0.2);
-    border-radius: 5px 0 0 5px;
+    border-radius: 5px;
     font-size: 1rem;
     background: var(--off-white);
     color: var(--text-dark);
@@ -281,12 +283,21 @@ body {
     outline: none;
 }
 
+.search-form-inline select {
+    padding: 0.75rem;
+    border: 2px solid rgba(139, 115, 85, 0.2);
+    border-radius: 5px;
+    background: var(--off-white);
+    color: var(--text-dark);
+    font-size: 1rem;
+}
+
 .search-form-inline button {
     padding: 0.75rem 1.5rem;
     background: var(--chocolate);
     color: var(--off-white);
     border: none;
-    border-radius: 0 5px 5px 0;
+    border-radius: 5px;
     cursor: pointer;
     transition: background 0.3s ease;
 }
@@ -380,6 +391,86 @@ body {
 
 .btn:hover {
     background: var(--light-chocolate);
+}
+
+.btn-secondary {
+    background: var(--medium-green);
+}
+
+.btn-secondary:hover {
+    background: var(--light-green);
+}
+
+/* Стили для поиска по отрывкам */
+.passages-results {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.passage-card {
+    background: var(--off-white);
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 15px rgba(45, 74, 58, 0.08);
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(139, 115, 85, 0.1);
+}
+
+.passage-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 25px rgba(45, 74, 58, 0.15);
+}
+
+.passage-header {
+    margin-bottom: 1rem;
+}
+
+.passage-header h3 {
+    color: var(--dark-green);
+    margin-bottom: 0.5rem;
+    font-family: 'Georgia', serif;
+    font-weight: normal;
+}
+
+.passage-header h3 a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.passage-header h3 a:hover {
+    color: var(--medium-green);
+}
+
+.passage-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.passage-content {
+    margin: 1rem 0;
+}
+
+.passage-content blockquote {
+    border-left: 4px solid var(--chocolate);
+    padding: 1rem 1.5rem;
+    margin: 0;
+    background: rgba(139, 115, 85, 0.05);
+    border-radius: 0 5px 5px 0;
+    font-style: italic;
+    line-height: 1.6;
+    color: var(--text-dark);
+}
+
+.passage-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 /* Информационные блоки */
@@ -658,6 +749,16 @@ body {
     .similar-list {
         grid-template-columns: 1fr;
     }
+    
+    .search-form-inline {
+        flex-direction: column;
+    }
+    
+    .search-form-inline input,
+    .search-form-inline select,
+    .search-form-inline button {
+        width: 100%;
+    }
 }
 
 @media (max-width: 480px) {
@@ -671,5 +772,42 @@ body {
     
     .container {
         padding: 0 15px;
+    }
+    
+    .passage-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .passage-actions {
+        flex-direction: column;
+    }
+    /* Стили для выделения релевантных частей текста */
+    .highlight {
+        background-color: #FFF3CD;
+        color: #856404;
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-weight: bold;
+        box-shadow: 0 0 0 1px #FFE8A1;
+    }
+
+    .passage-content blockquote .highlight {
+        background-color: rgba(255, 243, 205, 0.8);
+        border-left: 3px solid #FFC107;
+        padding-left: 5px;
+        margin-left: -5px;
+    }
+
+    /* Индикатор, что есть выделенные части */
+    .highlight-indicator {
+        display: inline-block;
+        background: #4CAF50;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        margin-left: 10px;
+        vertical-align: middle;
     }
 }

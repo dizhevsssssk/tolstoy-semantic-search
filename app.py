@@ -8,13 +8,78 @@ import plotly.utils
 import os
 from search_engine import TolstoySearchEngine
 
-print("Инициализация семантического поиска по Толстому...")
+print("=" * 50)
+print("Запуск приложения Tolstoy Search")
+print("=" * 50)
 
 # Проверка наличия файлов данных
 def check_data_files():
     required_files = [
         'data/tolstoy_embeddings_complete.npy',
-        'data/tolstoy_metadata_complete.json',
+        'data/tolstoy_metadata_complete.json', 
+        'data/tolstoy_embeddings_info_complete.json'
+    ]
+    
+    missing_files = []
+    for file_path in required_files:
+        if not os.path.exists(file_path):
+            missing_files.append(file_path)
+            print(f"❌ Ошибка: {file_path} - отсутствует")
+        else:
+            print(f"✅ Файл найден: {file_path}")
+    
+    if missing_files:
+        print("Критическая ошибка: отсутствуют файлы данных:")
+        for file in missing_files:
+            print(f"   - {file}")
+        print("Решение: Запустите vectorize_corpus.py для создания файлов")
+        return False
+    
+    return True
+
+print("Проверка файлов данных...")
+if not check_data_files():
+    print("Приложение не может быть запущено без файлов данных")
+    exit(1)
+
+# Инициализация поискового движка
+try:
+    print("Загрузка модели и векторов...")
+    
+    # Пытаемся импортировать класс
+    try:
+        from search_engine import TolstoySearchEngine
+        print("✅ Класс TolstoySearchEngine успешно импортирован")
+    except ImportError as e:
+        print(f"❌ Ошибка импорта: {e}")
+        print("Проверьте содержимое файла search_engine.py")
+        exit(1)
+    
+    search_engine = TolstoySearchEngine(
+        'data/tolstoy_embeddings_complete.npy',
+        'data/tolstoy_metadata_complete.json', 
+        'data/tolstoy_embeddings_info_complete.json',
+        'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
+    )
+    print("✅ Поисковый движок успешно инициализирован")
+    
+except Exception as e:
+    print(f"❌ Ошибка инициализации поискового движка: {e}")
+    import traceback
+    traceback.print_exc()
+    exit(1)
+
+app = Flask(__name__)
+app.secret_key = 'tolstoy_search_secret_key'
+
+print("✅ Flask приложение создано")
+
+print("Инициализация семантического поиска по Толстому...")
+
+def check_data_files():
+    required_files = [
+        'data/tolstoy_embeddings_complete.npy',
+        'data/tolstoy_metadata_complete.json', 
         'data/tolstoy_embeddings_info_complete.json'
     ]
     
@@ -40,7 +105,6 @@ if not check_data_files():
     print("Приложение не может быть запущено без файлов данных")
     exit(1)
 
-# Инициализация поискового движка
 try:
     print("Загрузка модели и векторов...")
     search_engine = TolstoySearchEngine(
@@ -50,6 +114,7 @@ try:
         'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
     )
     print("Поисковый движок успешно инициализирован")
+    
 except Exception as e:
     print(f"Ошибка инициализации поискового движка: {e}")
     exit(1)
@@ -78,13 +143,15 @@ def index():
     return render_template('index.html', 
                          popular_searches=popular_searches,
                          history=session['search_history'][-5:])
-
 @app.route('/search')
 def search():
     query = request.args.get('q', '')
-    if not query:
-        return render_template('search.html', results=[], query='')
+    search_type = request.args.get('type', 'passages')
     
+    if not query:
+        return render_template('search.html', results=[], query='', search_type=search_type)
+    
+    # Сохраняем в историю
     if 'search_history' not in session:
         session['search_history'] = []
     
@@ -93,12 +160,35 @@ def search():
         if len(session['search_history']) > 20:
             session['search_history'] = session['search_history'][-20:]
     
-    print(f"Поиск запроса: '{query}'")
-    results = search_engine.search(query, top_k=20)
-    print(f"Найдено результатов: {len(results)}")
+    print(f"Поиск запроса: '{query}' (тип: {search_type})")
     
-    return render_template('search.html', results=results, query=query)
-
+    try:
+        if search_type == 'passages':
+            # Поиск по отрывкам
+            results = search_engine.search_passages(query, top_k=15, min_similarity=0.3)
+            print(f"Найдено отрывков: {len(results)}")
+            
+            # Отладочная информация
+            if results:
+                print("Пример результата:", results[0].keys())
+            else:
+                print("Результаты пусты. Проверка данных...")
+                print(f"Всего отрывков в индексе: {len(search_engine.chunk_data)}")
+                if search_engine.chunk_data:
+                    print("Первый отрывок:", search_engine.chunk_data[0]['text'][:100] + "...")
+        else:
+            # Поиск по произведениям
+            results = search_engine.search_works(query, top_k=20)
+            print(f"Найдено произведений: {len(results)}")
+        
+        return render_template('search.html', results=results, query=query, search_type=search_type)
+    
+    except Exception as e:
+        print(f"Ошибка при поиске: {e}")
+        import traceback
+        traceback.print_exc()
+        return render_template('search.html', results=[], query=query, search_type=search_type, error=str(e))
+    
 @app.route('/work/<int:work_id>')
 def work_detail(work_id):
     work = search_engine.get_work_by_id(work_id)

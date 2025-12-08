@@ -7,32 +7,80 @@
     <div class="search-header">
         <form action="{{ url_for('search') }}" method="get" class="search-form-inline">
             <input type="text" name="q" value="{{ query }}" placeholder="Введите запрос..." required>
+            <select name="type">
+                <option value="passages" {% if search_type == 'passages' %}selected{% endif %}>Поиск отрывков</option>
+                <option value="works" {% if search_type == 'works' %}selected{% endif %}>Поиск произведений</option>
+            </select>
             <button type="submit">Поиск</button>
         </form>
-        <p class="results-count">Найдено произведений: {{ results|length }}</p>
+        <p class="results-count">
+            {% if search_type == 'passages' %}
+                Найдено отрывков: {{ results|length }}
+            {% else %}
+                Найдено произведений: {{ results|length }}
+            {% endif %}
+        </p>
     </div>
 
     {% if results %}
-    <div class="results-grid">
-        {% for result in results %}
-        <div class="result-card">
-            <div class="similarity-badge">{{ "%.1f"|format(result.similarity_percent) }}%</div>
-            <h3><a href="{{ result.url }}" target="_blank">{{ result.title }}</a></h3>
-            <div class="result-meta">
-                <span>📏 {{ result.original_length }} токенов</span>
-                <span>🔢 {{ result.num_chunks }} частей</span>
+        {% if search_type == 'passages' %}
+            <!-- Результаты поиска по отрывкам -->
+            <div class="passages-results">
+                {% for result in results %}
+                <div class="passage-card">
+                    <div class="similarity-badge">{{ "%.1f"|format(result.similarity_percent) }}%</div>
+                    
+                    <div class="passage-header">
+                        <h3>
+                            <a href="{{ result.work_url }}" target="_blank">{{ result.work_title }}</a>
+                        </h3>
+                        <div class="passage-meta">
+                            <span>📏 {{ result.word_count }} слов</span>
+                            <span>🎯 Схожесть: {{ "%.1f"|format(result.similarity_percent) }}%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="passage-content">
+                        <blockquote>
+                            {{ result.passage|safe }}
+                        </blockquote>
+                        {% if result.has_highlight %}
+                        <div class="highlight-note">
+                            <small>🔍 Выделены наиболее релевантные части</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                                        
+                    <div class="passage-actions">
+                        <a href="{{ result.work_url }}" target="_blank" class="btn">Читать полностью</a>
+                        <a href="{{ url_for('work_detail', work_id=result.work_id) }}" class="btn btn-secondary">О произведении</a>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-            <div class="result-actions">
-                <a href="{{ result.url }}" target="_blank" class="btn">Читать</a>
+        {% else %}
+            <!-- Результаты поиска по произведениям (старый формат) -->
+            <div class="results-grid">
+                {% for result in results %}
+                <div class="result-card">
+                    <div class="similarity-badge">{{ "%.1f"|format(result.similarity_percent) }}%</div>
+                    <h3><a href="{{ result.url }}" target="_blank">{{ result.title }}</a></h3>
+                    <div class="result-meta">
+                        <span>📏 {{ result.original_length }} токенов</span>
+                        <span>🔢 {{ result.num_chunks }} частей</span>
+                    </div>
+                    <div class="result-actions">
+                        <a href="{{ result.url }}" target="_blank" class="btn">Читать</a>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-        </div>
-        {% endfor %}
-    </div>
+        {% endif %}
     {% else %}
-    <div class="no-results">
-        <h2>Ничего не найдено</h2>
-        <p>Попробуйте изменить запрос или использовать другие ключевые слова</p>
-    </div>
+        <div class="no-results">
+            <h2>Ничего не найдено</h2>
+            <p>Попробуйте изменить запрос или использовать другие ключевые слова</p>
+        </div>
     {% endif %}
 </div>
 {% endblock %}
