@@ -8,27 +8,49 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="{{ url_for('index') }}" class="nav-logo">Толстой Search</a>
-            <div class="nav-links">
-                <a href="{{ url_for('index') }}">Главная</a>
-                <a href="{{ url_for('visualization') }}">Визуализация</a>
-                <a href="{{ url_for('history') }}">История</a>
-                <a href="{{ url_for('stats') }}">Статистика</a>
+    <div class="page-wrapper">
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="{{ url_for('index') }}" class="nav-logo">Толстой Search</a>
+                <div class="nav-links">
+                    <a href="{{ url_for('index') }}">Главная</a>
+                    <a href="{{ url_for('visualization') }}">Визуализация</a>
+                    <a href="{{ url_for('history') }}">История</a>
+                    <a href="{{ url_for('stats') }}">Статистика</a>
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
 
-    <main class="main-content">
-        {% block content %}{% endblock %}
-    </main>
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
 
-    <footer class="footer">
-        <div class="footer-content">
-            <p>Семантический поиск по произведениям Л.Н. Толстого</p>
-        </div>
-    </footer>
+        <footer class="footer">
+            <div class="footer-container">
+                <div class="footer-info">
+                    <h3>Толстой Search</h3>
+                    <p>Семантический поиск по произведениям Л.Н. Толстого</p>
+                    <p>Дипломный проект, 2026</p>
+                </div>
+                <div class="footer-author">
+                    <h4>Автор</h4>
+                    <p>Мария Дижевская</p>
+                    <p>
+                        <a href="https://github.com/dizhevsssssk" target="_blank">GitHub</a> | 
+                        <a href="mailto:example@example.com">Контакты</a>
+                    </p>
+                </div>
+                <div class="footer-tech">
+                    <h4>Технологии</h4>
+                    <p>Flask, Python, Sentence Transformers, Plotly</p>
+                    <p>Векторный семантический поиск</p>
+                </div>
+            </div>
+            <div class="footer-copyright">
+                <p>&copy; 2026 Толстой Search. Все права защищены.</p>
+            </div>
+        </footer>
+    </div>
 
     <script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>

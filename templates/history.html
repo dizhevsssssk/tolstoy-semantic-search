@@ -7,11 +7,16 @@
     <h1>История поиска</h1>
     
     {% if history %}
+    <div class="history-info">
+        <p>Всего запросов: {{ history|length }}</p>
+    </div>
     <div class="history-list">
         {% for query in history|reverse %}
         <div class="history-item">
-            <a href="{{ url_for('search', q=query) }}">{{ query }}</a>
-            <span class="history-time">Недавно</span>
+            <div class="history-query">
+                <a href="{{ url_for('search', q=query) }}">{{ query }}</a>
+            </div>
+            <div class="history-time">Недавно</div>
         </div>
         {% endfor %}
     </div>

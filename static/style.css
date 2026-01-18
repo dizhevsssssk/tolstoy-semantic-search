@@ -473,6 +473,44 @@ body {
     flex-wrap: wrap;
 }
 
+/* Выделение наиболее релевантного предложения - мягкий зеленый фон */
+.highlight-sentence {
+    background-color: rgba(74, 124, 89, 0.15) !important;
+    color: inherit !important;
+    padding: 4px 8px !important;
+    border-radius: 6px !important;
+    font-weight: normal !important;
+    box-shadow: none !important;
+    display: inline-block !important;
+    margin: 2px 0 !important;
+    border: 1px solid rgba(74, 124, 89, 0.3) !important;
+    text-decoration: none !important;
+    font-size: inherit !important;
+    text-shadow: none !important;
+}
+
+.passage-content blockquote .highlight-sentence {
+    background-color: rgba(74, 124, 89, 0.15) !important;
+    border-left: 4px solid rgba(74, 124, 89, 0.5) !important;
+    padding-left: 12px !important;
+    margin-left: -12px !important;
+    padding-right: 12px !important;
+    font-weight: normal !important;
+    text-decoration: none !important;
+    color: inherit !important;
+}
+
+/* Примечание о выделении */
+.highlight-note {
+    margin-top: 8px;
+    padding: 6px 12px;
+    background-color: #e8f5e9;
+    border-left: 4px solid #4CAF50;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #2e7d32;
+}
+
 /* Информационные блоки */
 .info-box {
     background: rgba(139, 115, 85, 0.05);
@@ -495,6 +533,21 @@ body {
 }
 
 /* История */
+.history-info {
+    background: var(--off-white);
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(45, 74, 58, 0.05);
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(139, 115, 85, 0.1);
+    font-size: 0.95rem;
+    color: var(--text-light);
+}
+
+.history-info p {
+    margin: 0;
+}
+
 .history-list {
     background: var(--off-white);
     border-radius: 10px;
@@ -504,36 +557,60 @@ body {
 }
 
 .history-item {
-    padding: 1rem 1.5rem;
+    padding: 1.25rem 1.5rem;
     border-bottom: 1px solid rgba(139, 115, 85, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: background 0.3s ease;
+    transition: all 0.3s ease;
+    position: relative;
 }
 
 .history-item:hover {
     background: rgba(139, 115, 85, 0.05);
+    transform: translateX(5px);
 }
 
 .history-item:last-child {
     border-bottom: none;
 }
 
-.history-item a {
+.history-item::before {
+    content: '🔍';
+    margin-right: 12px;
+    font-size: 1rem;
+    opacity: 0.7;
+}
+
+.history-query {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.history-query a {
     color: var(--dark-green);
     text-decoration: none;
     font-weight: 500;
     transition: color 0.3s ease;
+    font-size: 1.05rem;
+    line-height: 1.4;
 }
 
-.history-item a:hover {
+.history-query a:hover {
     color: var(--medium-green);
+    text-decoration: underline;
 }
 
 .history-time {
-    color: var(--text-light);
+    color: var(--chocolate);
     font-size: 0.9rem;
+    font-weight: 500;
+    background: rgba(139, 115, 85, 0.1);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    white-space: nowrap;
+    margin-left: 1rem;
 }
 
 .no-history {
@@ -543,6 +620,17 @@ body {
     border-radius: 10px;
     box-shadow: 0 2px 15px rgba(45, 74, 58, 0.08);
     border: 1px solid rgba(139, 115, 85, 0.1);
+}
+
+.no-history p {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    color: var(--text-light);
+}
+
+.no-history .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
 }
 
 /* Страница произведения */
@@ -569,245 +657,76 @@ body {
     color: var(--text-light);
 }
 
-.similar-works {
-    background: var(--off-white);
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 2px 15px rgba(45, 74, 58, 0.08);
-    border: 1px solid rgba(139, 115, 85, 0.1);
+/* Footer */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-.similar-works h2 {
-    color: var(--dark-green);
-    font-family: 'Georgia', serif;
-    font-weight: normal;
-    margin-bottom: 1rem;
+.page-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
-.similar-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
+.main-content {
+    flex: 1;
 }
 
-.similar-item {
-    background: var(--cream);
-    padding: 1rem;
-    border-radius: 5px;
-    position: relative;
-    transition: transform 0.3s ease;
-    border: 1px solid rgba(139, 115, 85, 0.1);
-}
-
-.similar-item:hover {
-    transform: translateY(-2px);
-}
-
-.similar-item .similarity-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: var(--light-green);
-    color: var(--off-white);
-    padding: 0.3rem 0.7rem;
-    border-radius: 15px;
-    font-size: 0.8rem;
-    font-weight: bold;
-}
-
-/* Статистика */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin: 2rem 0;
-}
-
-.stat-card {
-    background: var(--off-white);
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 2px 15px rgba(45, 74, 58, 0.08);
-    text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid rgba(139, 115, 85, 0.1);
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 25px rgba(45, 74, 58, 0.15);
-}
-
-.stat-number {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: var(--dark-green);
-    margin-bottom: 0.5rem;
-    font-family: 'Georgia', serif;
-}
-
-.stat-label {
-    color: var(--text-light);
-    font-size: 0.9rem;
-}
-
-.info-section {
-    background: var(--off-white);
-    padding: 2rem;
-    border-radius: 10px;
-    box-shadow: 0 2px 15px rgba(45, 74, 58, 0.08);
-    margin-top: 2rem;
-    border: 1px solid rgba(139, 115, 85, 0.1);
-}
-
-.info-section h2 {
-    color: var(--dark-green);
-    margin-bottom: 1rem;
-    font-family: 'Georgia', serif;
-    font-weight: normal;
-}
-
-.info-section p {
-    margin-bottom: 0.5rem;
-    line-height: 1.6;
-    color: var(--text-light);
-}
-
-/* Футер */
 .footer {
     background: var(--dark-green);
     color: var(--off-white);
-    text-align: center;
-    padding: 2rem 0;
-    margin-top: 3rem;
+    padding: 2rem 0 0;
+    margin-top: auto;
 }
 
-.footer-content p {
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.footer-info h3,
+.footer-author h4,
+.footer-tech h4 {
+    font-family: 'Georgia', serif;
+    font-weight: normal;
+    margin-bottom: 1rem;
+    color: var(--cream);
+}
+
+.footer-info p,
+.footer-author p,
+.footer-tech p {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+    opacity: 0.9;
+}
+
+.footer-author a {
+    color: var(--light-chocolate);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-author a:hover {
+    color: var(--cream);
+    text-decoration: underline;
+}
+
+.footer-copyright {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1rem 0;
+    text-align: center;
+    font-size: 0.9rem;
     opacity: 0.8;
 }
 
-/* Сообщения об ошибках и пустых состояниях */
-.no-results {
-    text-align: center;
-    padding: 3rem;
-    background: var(--off-white);
-    border-radius: 10px;
-    box-shadow: 0 2px 15px rgba(45, 74, 58, 0.08);
-    border: 1px solid rgba(139, 115, 85, 0.1);
-}
-
-.no-results h2 {
-    color: var(--dark-green);
-    margin-bottom: 1rem;
-    font-family: 'Georgia', serif;
-    font-weight: normal;
-}
-
-.no-results p {
-    color: var(--text-light);
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-    .hero-section h1 {
-        font-size: 2rem;
-    }
-    
-    .search-box {
-        flex-direction: column;
-        border-radius: 10px;
-    }
-    
-    .search-box input,
-    .search-box button {
-        border-radius: 0;
-        width: 100%;
-    }
-    
-    .results-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .nav-links {
-        display: none;
-    }
-    
-    .nav-container {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
-    .features-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .similar-list {
-        grid-template-columns: 1fr;
-    }
-    
-    .search-form-inline {
-        flex-direction: column;
-    }
-    
-    .search-form-inline input,
-    .search-form-inline select,
-    .search-form-inline button {
-        width: 100%;
-    }
-}
-
-@media (max-width: 480px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .hero-section {
-        padding: 2rem 0;
-    }
-    
-    .container {
-        padding: 0 15px;
-    }
-    
-    .passage-meta {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .passage-actions {
-        flex-direction: column;
-    }
-    /* Стили для выделения релевантных частей текста */
-    .highlight {
-        background-color: #FFF3CD;
-        color: #856404;
-        padding: 2px 4px;
-        border-radius: 3px;
-        font-weight: bold;
-        box-shadow: 0 0 0 1px #FFE8A1;
-    }
-
-    .passage-content blockquote .highlight {
-        background-color: rgba(255, 243, 205, 0.8);
-        border-left: 3px solid #FFC107;
-        padding-left: 5px;
-        margin-left: -5px;
-    }
-
-    /* Индикатор, что есть выделенные части */
-    .highlight-indicator {
-        display: inline-block;
-        background: #4CAF50;
-        color: white;
-        padding: 2px 8px;
-        border-radius: 12px;
-        font-size: 0.8em;
-        margin-left: 10px;
-        vertical-align: middle;
-    }
+.footer-copyright p {
+    margin: 0;
 }
