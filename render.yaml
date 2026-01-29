@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: tolstoy-semantic-search
+    env: python
+    region: frankfurt
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: FLASK_DEBUG
+        value: "False"
+    disk:
+      name: data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
