@@ -6,18 +6,31 @@
 <div class="container">
     <div class="search-header">
         <form action="{{ url_for('search') }}" method="get" class="search-form-inline">
-            <input type="text" name="q" value="{{ query }}" placeholder="Введите запрос..." required>
-            <select name="type">
-                <option value="passages" {% if search_type == 'passages' %}selected{% endif %}>Поиск отрывков</option>
-                <option value="works" {% if search_type == 'works' %}selected{% endif %}>Поиск произведений</option>
-            </select>
-            <button type="submit">Поиск</button>
+            <div class="search-input-group">
+                <div class="main-query-container">
+                    <input type="text" name="q" value="{{ query }}" placeholder="Введите запрос..." required>
+                </div>
+                <div class="negative-query-container-inline">
+                    <input type="text" name="negative_q" value="{{ negative_query }}" placeholder="Исключить темы (опционально)" class="negative-query-input-inline">
+                    <div class="negative-query-hint-inline">
+                        <small>Темы, которые нужно исключить из результатов</small>
+                    </div>
+                </div>
+                <select name="type">
+                    <option value="passages" {% if search_type == 'passages' %}selected{% endif %}>Поиск отрывков</option>
+                    <option value="works" {% if search_type == 'works' %}selected{% endif %}>Поиск произведений</option>
+                </select>
+                <button type="submit">Поиск</button>
+            </div>
         </form>
         <p class="results-count">
             {% if search_type == 'passages' %}
                 Найдено отрывков: {{ results|length }}
             {% else %}
                 Найдено произведений: {{ results|length }}
+            {% endif %}
+            {% if negative_query %}
+                <span class="negative-query-indicator">(исключены темы: "{{ negative_query }}")</span>
             {% endif %}
         </p>
     </div>

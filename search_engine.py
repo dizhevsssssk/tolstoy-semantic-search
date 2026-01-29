@@ -216,20 +216,36 @@ class TolstoySearchEngine:
         else:
             return passage, False
 
-    def search_passages(self, query, top_k=15, min_similarity=0.3):
-        """Поиск по отрывкам"""
+    def search_passages(self, query, top_k=15, min_similarity=0.3, negative_query=None, negative_weight=0.5):
+        """Поиск по отрывкам с поддержкой отрицательных запросов"""
         if self.chunk_embeddings is None or len(self.chunk_data) == 0:
             return self._fallback_search_works(query, top_k)
         
-        # Кодируем запрос
+        # Кодируем основной запрос
         query_vector = self.model.encode([query])
         query_vector = query_vector / np.linalg.norm(query_vector, axis=1, keepdims=True)
         
+        # Если есть отрицательный запрос, корректируем вектор запроса
+        if negative_query and negative_query.strip():
+            negative_vector = self.model.encode([negative_query])
+            negative_vector = negative_vector / np.linalg.norm(negative_vector, axis=1, keepdims=True)
+            # Вычитаем вектор отрицательного запроса с заданным весом
+            adjusted_vector = query_vector - negative_vector * negative_weight
+            adjusted_vector = adjusted_vector / np.linalg.norm(adjusted_vector, axis=1, keepdims=True)
+            search_vector = adjusted_vector
+        else:
+            search_vector = query_vector
+        
         # Вычисляем схожесть
-        similarities = cosine_similarity(query_vector, self.chunk_embeddings)[0]
+        similarities = cosine_similarity(search_vector, self.chunk_embeddings)[0]
+        
+        # Если есть отрицательный запрос, дополнительно вычисляем схожесть с ним для фильтрации
+        negative_similarities = None
+        if negative_query and negative_query.strip():
+            negative_similarities = cosine_similarity(negative_vector, self.chunk_embeddings)[0]
         
         # Получаем топ-K результатов
-        top_indices = np.argsort(similarities)[-top_k*2:][::-1]
+        top_indices = np.argsort(similarities)[-top_k*3:][::-1]  # Берем больше результатов для фильтрации
         
         results = []
         seen_texts = set()
@@ -242,6 +258,18 @@ class TolstoySearchEngine:
             if similarity < min_similarity:
                 continue
                 
+            # Фильтруем результаты, которые слишком похожи на отрицательный запрос
+            if negative_similarities is not None:
+                negative_sim = negative_similarities[idx]
+                # Если схожесть с отрицательным запросом высокая, пропускаем
+                if negative_sim > 0.7:  # Порог можно настроить
+                    continue
+                # Уменьшаем оценку схожести на основе отрицательной схожести
+                adjusted_similarity = similarity - negative_sim * negative_weight
+                if adjusted_similarity < min_similarity:
+                    continue
+                similarity = max(min_similarity, adjusted_similarity)
+            
             chunk_info = self.chunk_data[idx]
             passage_text = chunk_info['text']
             
@@ -265,7 +293,8 @@ class TolstoySearchEngine:
                 'similarity_percent': round(float(similarity) * 100, 1),
                 'word_count': chunk_info['word_count'],
                 'passage_length': chunk_info['word_count'],
-                'has_highlight': has_highlight
+                'has_highlight': has_highlight,
+                'negative_query_used': negative_query is not None and negative_query.strip() != ''
             })
             
             if len(results) >= top_k:
@@ -307,25 +336,64 @@ class TolstoySearchEngine:
                 return i
         return 0
 
-    def search_works(self, query, top_k=20):
-        """Поиск по произведениям"""
+    def search_works(self, query, top_k=20, negative_query=None, negative_weight=0.5):
+        """Поиск по произведениям с поддержкой отрицательных запросов"""
+        # Кодируем основной запрос
         query_vector = self.model.encode([query])
         query_vector = query_vector / np.linalg.norm(query_vector, axis=1, keepdims=True)
         
-        similarities = cosine_similarity(query_vector, self.embeddings)[0]
-        top_indices = np.argsort(similarities)[-top_k:][::-1]
+        # Если есть отрицательный запрос, корректируем вектор запроса
+        if negative_query and negative_query.strip():
+            negative_vector = self.model.encode([negative_query])
+            negative_vector = negative_vector / np.linalg.norm(negative_vector, axis=1, keepdims=True)
+            # Вычитаем вектор отрицательного запроса с заданным весом
+            adjusted_vector = query_vector - negative_vector * negative_weight
+            adjusted_vector = adjusted_vector / np.linalg.norm(adjusted_vector, axis=1, keepdims=True)
+            search_vector = adjusted_vector
+        else:
+            search_vector = query_vector
+        
+        # Вычисляем схожесть
+        similarities = cosine_similarity(search_vector, self.embeddings)[0]
+        
+        # Если есть отрицательный запрос, дополнительно вычисляем схожесть с ним для фильтрации
+        negative_similarities = None
+        if negative_query and negative_query.strip():
+            negative_similarities = cosine_similarity(negative_vector, self.embeddings)[0]
+        
+        # Получаем топ-K результатов
+        top_indices = np.argsort(similarities)[-top_k*2:][::-1]  # Берем больше результатов для фильтрации
         
         results = []
-        for i, idx in enumerate(top_indices):
+        
+        for idx in top_indices:
+            similarity = similarities[idx]
+            
+            # Фильтруем результаты, которые слишком похожи на отрицательный запрос
+            if negative_similarities is not None:
+                negative_sim = negative_similarities[idx]
+                # Если схожесть с отрицательным запросом высокая, пропускаем
+                if negative_sim > 0.7:  # Порог можно настроить
+                    continue
+                # Уменьшаем оценку схожести на основе отрицательной схожести
+                adjusted_similarity = similarity - negative_sim * negative_weight
+                if adjusted_similarity < 0.1:  # Минимальный порог
+                    continue
+                similarity = max(0.1, adjusted_similarity)
+            
             work = self.metadata[idx]
             results.append({
-                'rank': i + 1,
+                'rank': len(results) + 1,
                 'title': work['title'],
                 'url': work['url'],
-                'similarity': float(similarities[idx]),
-                'similarity_percent': round(float(similarities[idx]) * 100, 1),
-                'original_length': work['original_length']
+                'similarity': float(similarity),
+                'similarity_percent': round(float(similarity) * 100, 1),
+                'original_length': work['original_length'],
+                'negative_query_used': negative_query is not None and negative_query.strip() != ''
             })
+            
+            if len(results) >= top_k:
+                break
         
         return results
 

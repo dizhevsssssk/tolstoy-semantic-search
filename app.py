@@ -77,12 +77,13 @@ def index():
 @app.route('/search')
 def search():
     query = request.args.get('q', '')
+    negative_query = request.args.get('negative_q', '')
     search_type = request.args.get('type', 'passages')
     
     if not query:
-        return render_template('search.html', results=[], query='', search_type=search_type)
+        return render_template('search.html', results=[], query='', negative_query='', search_type=search_type)
     
-    # Сохраняем в историю
+    # Сохраняем в историю (только основной запрос)
     if 'search_history' not in session:
         session['search_history'] = []
     
@@ -97,17 +98,17 @@ def search():
     
     try:
         if search_type == 'passages':
-            # Поиск по отрывкам
-            results = search_engine.search_passages(query, top_k=15)
+            # Поиск по отрывкам с отрицательным запросом
+            results = search_engine.search_passages(query, top_k=15, negative_query=negative_query)
         else:
-            # Поиск по произведениям
-            results = search_engine.search_works(query, top_k=20)
+            # Поиск по произведениям с отрицательным запросом
+            results = search_engine.search_works(query, top_k=20, negative_query=negative_query)
         
-        return render_template('search.html', results=results, query=query, search_type=search_type)
+        return render_template('search.html', results=results, query=query, negative_query=negative_query, search_type=search_type)
     
     except Exception as e:
         print(f"Ошибка при поиске: {e}")
-        return render_template('search.html', results=[], query=query, search_type=search_type, error=str(e))
+        return render_template('search.html', results=[], query=query, negative_query=negative_query, search_type=search_type, error=str(e))
     
 @app.route('/work/<int:work_id>')
 def work_detail(work_id):
@@ -194,8 +195,9 @@ def stats():
 @app.route('/api/search')
 def api_search():
     query = request.args.get('q', '')
+    negative_query = request.args.get('negative_q', '')
     # Используем поиск по отрывкам как основной API
-    results = search_engine.search_passages(query, top_k=10)
+    results = search_engine.search_passages(query, top_k=10, negative_query=negative_query)
     return jsonify(results)
 
 @app.route('/api/works')
